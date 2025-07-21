@@ -9,8 +9,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/coder/agentapi/lib/logctx"
-	"github.com/coder/agentapi/lib/termexec"
+	"github.com/zohaibahmed/clauder/lib/logctx"
+	"github.com/zohaibahmed/clauder/lib/termexec"
 )
 
 type SetupProcessConfig struct {

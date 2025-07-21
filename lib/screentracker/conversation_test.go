@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	st "github.com/coder/agentapi/lib/screentracker"
+	st "github.com/zohaibahmed/clauder/lib/screentracker"
 )
 
 type statusTestStep struct {

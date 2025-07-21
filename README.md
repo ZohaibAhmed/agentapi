@@ -1,136 +1,250 @@
-# AgentAPI
+# Clauder
 
-Control [Claude Code](https://github.com/anthropics/claude-code), [Goose](https://github.com/block/goose), [Aider](https://github.com/Aider-AI/aider), and [Codex](https://github.com/openai/codex) with an HTTP API.
+Control [Claude Code](https://claude.ai/code) from your iPhone with secure remote access. Clauder provides an iOS app for remote coding sessions.
 
 ![agentapi-chat](https://github.com/user-attachments/assets/57032c9f-4146-4b66-b219-09e38ab7690d)
 
+**Key Features:**
+- **Remote iOS Access**: Control Claude Code from your iPhone using a simple passcode
+- **Secure Tunneling**: Encrypted connection over the internet with zero configuration
+- **Local Terminal Access**: Direct terminal attach for laptop usage
+- **Real-time Sync**: Both local and remote interfaces stay synchronized
+- **One-Command Setup**: Get started in seconds with `clauder quickstart`
 
-You can use AgentAPI:
+## Quick Start
 
-- to build a unified chat interface for coding agents
-- as a backend in an MCP server that lets one agent control another coding agent
-- to create a tool that submits pull request reviews to an agent
-- and much more!
+### Prerequisites
 
-## Quickstart
+1. **Install Claude Code**: Follow the installation guide at [claude.ai/code](https://claude.ai/code)
+2. **Install Go**: Version 1.21 or later for building from source
 
-1. Install `agentapi` by downloading the latest release binary from the [releases page](https://github.com/coder/agentapi/releases).
+### Installation
 
-1. Verify the installation:
+#### Option 1: Build from Source
 
+```bash
+git clone https://github.com/zohaibahmed/clauder.git
+cd clauder
+make build
+```
+
+This will create the `clauder` binary in the `out/` directory.
+
+#### Option 2: Download Binary
+
+Download the latest binary from the [releases page](https://github.com/zohaibahmed/clauder/releases) and add it to your PATH.
+
+### Configuration
+
+Before running Clauder, you need to set up your configuration:
+
+1. **Copy the example configuration:**
    ```bash
-   agentapi --help
+   cp .env.example .env
    ```
 
-   > On macOS, if you're prompted that the system was unable to verify the binary, go to `System Settings -> Privacy & Security`, click "Open Anyway", and run the command again.
-
-1. Run a Claude Code server (assumes `claude` is installed on your system and in the `PATH`):
-
+2. **Edit the `.env` file** with your settings:
    ```bash
-   agentapi server -- claude
+   # Required for remote iOS access
+   COORDINATOR_URL=https://claude-code-coordinator.team-ad9.workers.dev
+   
+   # Optional: Change the default port
+   # PORT=3284
    ```
 
-   > If you're getting an error that `claude` is not in the `PATH` but you can run it from your shell, try `which claude` to get the full path and use that instead.
+3. **Configuration Options:**
+   - **COORDINATOR_URL**: Required for `clauder quickstart` remote access. This should point to your deployed coordinator service.
+   - **PORT**: HTTP server port (default: 3284)
 
-1. Send a message to the agent:
+> **Note:** If you don't set `COORDINATOR_URL`, remote iOS access won't work, but local terminal access (`clauder attach`) will still function.
 
-   ```bash
-   curl -X POST localhost:3284/message \
-     -H "Content-Type: application/json" \
-     -d '{"content": "Hello, agent!", "type": "user"}'
-   ```
+### Getting Started
 
-1. Get the conversation history:
+Start Clauder with both local terminal and remote iOS access:
 
-   ```bash
-   curl localhost:3284/messages
-   ```
+```bash
+./out/clauder quickstart
+```
 
-1. Try the chat web interface at http://localhost:3284/chat.
+This will:
+- Start Claude Code
+- Launch the HTTP server with authentication
+- Create a secure tunnel for remote access
+- Display a passcode like `ALPHA-TIGER-OCEAN-1234`
+
+**For local access** (same machine):
+```bash
+# In a new terminal
+./out/clauder attach --url localhost:3284
+```
+
+**For iOS access**:
+1. Open the Xcode project in the `ios/` folder and build the app
+2. Enter the passcode displayed by `clauder quickstart`
+3. Start coding from your iPhone!
+
 
 ## CLI Commands
 
-### `agentapi server`
+### `clauder quickstart`
 
-Run an HTTP server that lets you control an agent. If you'd like to start an agent with additional arguments, pass the full agent command after the `--` flag.
-
-```bash
-agentapi server -- claude --allowedTools "Bash(git*) Edit Replace"
-```
-
-You may also use `agentapi` to run the Aider and Goose agents:
+Start Claude Code with both local and remote iOS access (recommended):
 
 ```bash
-agentapi server -- aider --model sonnet --api-key anthropic=sk-ant-apio3-XXX
-agentapi server -- goose
+clauder quickstart [flags]
 ```
 
-An OpenAPI schema is available in [openapi.json](openapi.json).
+**Flags:**
+- `-p, --port`: HTTP server port (default: 3284)
+- `-h, --help`: Show help
 
-By default, the server runs on port 3284. Additionally, the server exposes the same OpenAPI schema at http://localhost:3284/openapi.json and the available endpoints in a documentation UI at http://localhost:3284/docs.
+This command will:
+1. Start Claude Code
+2. Launch authenticated HTTP server
+3. Create secure tunnel for remote access
+4. Display connection passcode
 
-There are 4 endpoints:
+### `clauder server`
 
-- GET `/messages` - returns a list of all messages in the conversation with the agent
-- POST `/message` - sends a message to the agent. When a 200 response is returned, AgentAPI has detected that the agent started processing the message
-- GET `/status` - returns the current status of the agent, either "stable" or "running"
-- GET `/events` - an SSE stream of events from the agent: message and status updates
-
-### `agentapi attach`
-
-Attach to a running agent's terminal session.
+Start just the HTTP server (without tunnel):
 
 ```bash
-agentapi attach --url localhost:3284
+clauder server [agent] [flags]
 ```
 
-Press `ctrl+c` to detach from the session.
+**Arguments:**
+- `agent`: The coding agent to control (claude, goose, aider, codex)
 
-## How it works
+**Flags:**
+- `-p, --port`: HTTP server port (default: 3284)
+- `--no-auth`: Disable authentication (not recommended for remote access)
 
-AgentAPI runs an in-memory terminal emulator. It translates API calls into appropriate terminal keystrokes and parses the agent's outputs into individual messages.
+### `clauder attach`
 
-### Splitting terminal output into messages
+Attach to a running Claude Code session in your terminal:
 
-There are 2 types of messages:
+```bash
+clauder attach --url localhost:3284
+```
 
-- User messages: sent by the user to the agent
-- Agent messages: sent by the agent to the user
+Press `Ctrl+C` to detach from the session.
 
-To parse individual messages from the terminal output, we take the following steps:
+## Development
 
-1. The initial terminal output, before any user messages are sent, is treated as the agent's first message.
-2. When the user sends a message through the API, a snapshot of the terminal is taken before any keystrokes are sent.
-3. The user message is then submitted to the agent. From this point on, any time the terminal output changes, a new snapshot is taken. It's diffed against the initial snapshot, and any new text that appears below the initial content is treated as the agent's next message.
-4. If the terminal output changes again before a new user message is sent, the agent message is updated.
+### Building from Source
 
-This lets us split the terminal output into a sequence of messages.
+```bash
+# Clone the repository
+git clone https://github.com/zohaibahmed/clauder.git
+cd clauder
 
-### Removing TUI elements from agent messages
+# Build the complete project (Go backend + Next.js frontend)
+make build
 
-Each agent message contains some extra bits that aren't useful to the end user:
+# Or build just the Go binary
+go build -o out/clauder main.go
 
-- The user's input at the beginning of the message. Coding agents often echo the input back to the user to make it visible in the terminal.
-- An input box at the end of the message. This is where the user usually types their input.
+# Run tests
+go test ./...
+```
 
-AgentAPI automatically removes these.
+### Frontend Development
 
-- For user input, we strip the lines that contain the text from the user's last message.
-- For the input box, we look for lines at the end of the message that contain common TUI elements, like `>` or `------`.
+```bash
+cd chat
+bun install
+bun run dev
+```
 
-### What will happen when Claude Code, Goose, Aider, or Codex update their TUI?
+### Building the iOS app
 
-Splitting the terminal output into a sequence of messages should still work, since it doesn't depend on the TUI structure. The logic for removing extra bits may need to be updated to account for new elements. AgentAPI will still be usable, but some extra TUI elements may become visible in the agent messages.
+To build the iOS app locally:
 
-## Roadmap
+```bash
+cd ios
+open AgentCodeRemote.xcodeproj
+```
 
-Pending feedback, we're considering the following features:
+**Requirements:**
+- Xcode 15.0+
+- iOS 16.0+ target device
+- Apple Developer account for device installation
 
-- [Support the MCP protocol](https://github.com/coder/agentapi/issues/1)
-- [Support the Agent2Agent Protocol](https://github.com/coder/agentapi/issues/2)
+## API Reference
 
-## Long-term vision
+Clauder exposes a REST API for controlling coding agents:
 
-In the short term, AgentAPI solves the problem of how to programmatically control coding agents. As time passes, we hope to see the major agents release proper SDKs. One might wonder whether AgentAPI will still be needed then. We think that depends on whether agent vendors decide to standardize on a common API, or each sticks with a proprietary format.
+### Endpoints
 
-In the former case, we'll deprecate AgentAPI in favor of the official SDKs. In the latter case, our goal will be to make AgentAPI a universal adapter to control any coding agent, so a developer using AgentAPI can switch between agents without changing their code.
+- `GET /messages` - Get all conversation messages
+- `POST /message` - Send a message to the agent
+- `GET /status` - Get current agent status
+- `GET /events` - Server-sent events stream for real-time updates
+- `GET /health` - Health check endpoint
+
+### Authentication
+
+When using `clauder quickstart`, all endpoints (except `/health`) require Bearer token authentication:
+
+```bash
+curl -H "Authorization: Bearer YOUR_TOKEN" https://your-tunnel-url/messages
+```
+
+The token is automatically generated and displayed when starting quickstart mode.
+
+## Security
+
+Clauder uses several security measures for remote access:
+
+- **End-to-end encryption**: All communication over HTTPS tunnels
+- **Token-based authentication**: 256-bit random tokens with 24-hour expiration
+- **Passcode system**: Human-readable codes that expire after use
+- **No direct exposure**: Your Mac is never directly exposed to the internet
+- **Keychain storage**: iOS app stores credentials securely
+
+## Troubleshooting
+
+**"Failed to start Claude Code"**
+- Ensure Claude Code is installed: `which claude`
+- Check your PATH: `echo $PATH`
+
+**"Failed to establish tunnel"**
+- Check firewall settings
+- Verify internet connection: `curl -I https://claude.ai`
+
+**"Invalid passcode" on iOS**
+- Ensure correct capitalization
+- Check if the passcode has expired (24 hours)
+- Verify the Mac is still running Clauder
+
+## Configuration
+
+### Environment Variables
+
+- `COORDINATOR_URL` - Override the default coordinator service URL
+- `PORT` - Default port for HTTP server (default: 3284)
+
+### Custom Coordinator Service
+
+To use your own coordinator service, deploy the Cloudflare Worker in the `coordinator/` directory:
+
+```bash
+cd coordinator
+# Update wrangler.toml with your KV namespace ID
+wrangler kv:namespace create "SESSIONS"
+wrangler deploy
+```
+
+Then set the environment variable:
+
+```bash
+export COORDINATOR_URL=https://your-coordinator.workers.dev
+```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Credits
+
+Inspired by the need for remote coding capabilities and built with modern web technologies.

@@ -10,10 +10,10 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/coder/agentapi/lib/httpapi"
-	"github.com/coder/agentapi/lib/logctx"
-	"github.com/coder/agentapi/lib/msgfmt"
 	"github.com/stretchr/testify/require"
+	"github.com/zohaibahmed/clauder/lib/httpapi"
+	"github.com/zohaibahmed/clauder/lib/logctx"
+	"github.com/zohaibahmed/clauder/lib/msgfmt"
 )
 
 func normalizeSchema(t *testing.T, schema any) any {

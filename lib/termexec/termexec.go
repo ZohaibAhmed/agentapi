@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/ActiveState/termtest/xpty"
-	"github.com/coder/agentapi/lib/logctx"
-	"github.com/coder/agentapi/lib/util"
+	"github.com/zohaibahmed/clauder/lib/logctx"
+	"github.com/zohaibahmed/clauder/lib/util"
 	"golang.org/x/xerrors"
 )
 

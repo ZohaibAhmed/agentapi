@@ -6,10 +6,10 @@ import (
 	"sync"
 	"time"
 
-	mf "github.com/coder/agentapi/lib/msgfmt"
-	st "github.com/coder/agentapi/lib/screentracker"
-	"github.com/coder/agentapi/lib/util"
 	"github.com/danielgtaylor/huma/v2"
+	mf "github.com/zohaibahmed/clauder/lib/msgfmt"
+	st "github.com/zohaibahmed/clauder/lib/screentracker"
+	"github.com/zohaibahmed/clauder/lib/util"
 )
 
 type EventType string

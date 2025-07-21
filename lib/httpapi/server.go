@@ -9,15 +9,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coder/agentapi/lib/logctx"
-	mf "github.com/coder/agentapi/lib/msgfmt"
-	st "github.com/coder/agentapi/lib/screentracker"
-	"github.com/coder/agentapi/lib/termexec"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 	"github.com/danielgtaylor/huma/v2/sse"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
+	"github.com/zohaibahmed/clauder/lib/logctx"
+	mf "github.com/zohaibahmed/clauder/lib/msgfmt"
+	st "github.com/zohaibahmed/clauder/lib/screentracker"
+	"github.com/zohaibahmed/clauder/lib/termexec"
 	"golang.org/x/xerrors"
 )
 
@@ -58,6 +58,16 @@ const snapshotInterval = 25 * time.Millisecond
 
 // NewServer creates a new server instance
 func NewServer(ctx context.Context, agentType mf.AgentType, process *termexec.Process, port int, chatBasePath string) *Server {
+	return newServer(ctx, agentType, process, port, chatBasePath, "")
+}
+
+// NewServerWithAuth creates a new server instance with Bearer token authentication
+func NewServerWithAuth(ctx context.Context, agentType mf.AgentType, process *termexec.Process, port int, chatBasePath string, token string) *Server {
+	return newServer(ctx, agentType, process, port, chatBasePath, token)
+}
+
+// newServer creates a new server instance with optional authentication
+func newServer(ctx context.Context, agentType mf.AgentType, process *termexec.Process, port int, chatBasePath string, token string) *Server {
 	router := chi.NewMux()
 
 	corsMiddleware := cors.New(cors.Options{
@@ -70,8 +80,13 @@ func NewServer(ctx context.Context, agentType mf.AgentType, process *termexec.Pr
 	})
 	router.Use(corsMiddleware.Handler)
 
-	humaConfig := huma.DefaultConfig("AgentAPI", "0.2.3")
-	humaConfig.Info.Description = "HTTP API for Claude Code, Goose, and Aider.\n\nhttps://github.com/coder/agentapi"
+	// Add authentication middleware if token is provided
+	if token != "" {
+		router.Use(AuthMiddleware(token))
+	}
+
+	humaConfig := huma.DefaultConfig("Clauder", "0.2.3")
+	humaConfig.Info.Description = "HTTP API for Claude Code, Goose, and Aider.\n\nhttps://github.com/zohaibahmed/clauder"
 	api := humachi.New(router, humaConfig)
 	formatMessage := func(message string, userInput string) string {
 		return mf.FormatAgentMessage(agentType, message, userInput)
@@ -117,6 +132,11 @@ func (s *Server) StartSnapshotLoop(ctx context.Context) {
 
 // registerRoutes sets up all API endpoints
 func (s *Server) registerRoutes(chatBasePath string) {
+	// GET /health endpoint (no auth required)
+	huma.Get(s.api, "/health", s.getHealth, func(o *huma.Operation) {
+		o.Description = "Health check endpoint."
+	})
+
 	// GET /status endpoint
 	huma.Get(s.api, "/status", s.getStatus, func(o *huma.Operation) {
 		o.Description = "Returns the current status of the agent."
@@ -159,6 +179,21 @@ func (s *Server) registerRoutes(chatBasePath string) {
 
 	// Serve static files for the chat interface under /chat
 	s.registerStaticFileRoutes(chatBasePath)
+}
+
+// getHealth handles GET /health
+func (s *Server) getHealth(ctx context.Context, input *struct{}) (*struct {
+	Body struct {
+		Status string `json:"status"`
+	}
+}, error) {
+	resp := &struct {
+		Body struct {
+			Status string `json:"status"`
+		}
+	}{}
+	resp.Body.Status = "ok"
+	return resp, nil
 }
 
 // getStatus handles GET /status

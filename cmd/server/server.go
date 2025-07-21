@@ -12,10 +12,10 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/xerrors"
 
-	"github.com/coder/agentapi/lib/httpapi"
-	"github.com/coder/agentapi/lib/logctx"
-	"github.com/coder/agentapi/lib/msgfmt"
-	"github.com/coder/agentapi/lib/termexec"
+	"github.com/zohaibahmed/clauder/lib/httpapi"
+	"github.com/zohaibahmed/clauder/lib/logctx"
+	"github.com/zohaibahmed/clauder/lib/msgfmt"
+	"github.com/zohaibahmed/clauder/lib/termexec"
 )
 
 var (

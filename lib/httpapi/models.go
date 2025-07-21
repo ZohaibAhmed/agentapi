@@ -3,9 +3,9 @@ package httpapi
 import (
 	"time"
 
-	st "github.com/coder/agentapi/lib/screentracker"
-	"github.com/coder/agentapi/lib/util"
 	"github.com/danielgtaylor/huma/v2"
+	st "github.com/zohaibahmed/clauder/lib/screentracker"
+	"github.com/zohaibahmed/clauder/lib/util"
 )
 
 type MessageType string
@@ -48,7 +48,7 @@ type MessagesResponse struct {
 
 type MessageRequestBody struct {
 	Content string      `json:"content" example:"Hello, agent!" doc:"Message content"`
-	Type    MessageType `json:"type" doc:"A 'user' type message will be logged as a user message in the conversation history and submitted to the agent. AgentAPI will wait until the agent starts carrying out the task described in the message before responding. A 'raw' type message will be written directly to the agent's terminal session as keystrokes and will not be saved in the conversation history. 'raw' messages are useful for sending escape sequences to the terminal."`
+	Type    MessageType `json:"type" doc:"A 'user' type message will be logged as a user message in the conversation history and submitted to the agent. Clauder will wait until the agent starts carrying out the task described in the message before responding. A 'raw' type message will be written directly to the agent's terminal session as keystrokes and will not be saved in the conversation history. 'raw' messages are useful for sending escape sequences to the terminal."`
 }
 
 // MessageRequest represents a request to create a new message

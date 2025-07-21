@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coder/agentapi/lib/msgfmt"
-	"github.com/coder/agentapi/lib/util"
 	"github.com/danielgtaylor/huma/v2"
+	"github.com/zohaibahmed/clauder/lib/msgfmt"
+	"github.com/zohaibahmed/clauder/lib/util"
 	"golang.org/x/xerrors"
 )
 

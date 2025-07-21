@@ -4,15 +4,16 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/coder/agentapi/cmd/attach"
-	"github.com/coder/agentapi/cmd/server"
 	"github.com/spf13/cobra"
+	"github.com/zohaibahmed/clauder/cmd/attach"
+	"github.com/zohaibahmed/clauder/cmd/quickstart"
+	"github.com/zohaibahmed/clauder/cmd/server"
 )
 
 var rootCmd = &cobra.Command{
-	Use:     "agentapi",
-	Short:   "AgentAPI CLI",
-	Long:    `AgentAPI - HTTP API for Claude Code, Goose, Aider, and Codex`,
+	Use:     "clauder",
+	Short:   "Clauder CLI",
+	Long:    `Clauder - HTTP API for Claude Code, Goose, Aider, and Codex`,
 	Version: "0.2.3",
 }
 
@@ -27,4 +28,5 @@ func Execute() {
 func init() {
 	rootCmd.AddCommand(server.ServerCmd)
 	rootCmd.AddCommand(attach.AttachCmd)
+	rootCmd.AddCommand(quickstart.QuickstartCmd)
 }

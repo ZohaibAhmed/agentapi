@@ -13,9 +13,9 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/coder/agentapi/lib/httpapi"
 	"github.com/spf13/cobra"
 	sse "github.com/tmaxmax/go-sse"
+	"github.com/zohaibahmed/clauder/lib/httpapi"
 	"golang.org/x/term"
 	"golang.org/x/xerrors"
 )
@@ -237,5 +237,5 @@ var AttachCmd = &cobra.Command{
 }
 
 func init() {
-	AttachCmd.Flags().StringVarP(&remoteUrlArg, "url", "u", "localhost:3284", "URL of the agentapi server to attach to. May optionally include a protocol and a path.")
+	AttachCmd.Flags().StringVarP(&remoteUrlArg, "url", "u", "localhost:3284", "URL of the clauder server to attach to. May optionally include a protocol and a path.")
 }

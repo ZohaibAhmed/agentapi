@@ -74,7 +74,7 @@ func FileServerWithIndexFallback(chatBasePath string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if isChatDirEmpty {
 			http.Error(w,
-				"Looks like you're running an agentapi build without the chat UI. To rebuild the binary with the UI files embedded, run `make build`.",
+				"Looks like you're running a clauder build without the chat UI. To rebuild the binary with the UI files embedded, run `make build`.",
 				http.StatusNotFound)
 			return
 		}
